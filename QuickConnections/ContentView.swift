@@ -44,7 +44,7 @@ struct ContentView: View {
                 
                 // Text Field with Two-Word Limit
                 HStack(spacing: 12) {
-                    TextField("Enter a word or phrase", text: $textInput)
+                    TextField("Enter a word", text: $textInput)
                         .textFieldStyle(.roundedBorder)
                         .onChange(of: textInput) { oldValue, newValue in
                             // Prewarm on first character typed
@@ -89,7 +89,7 @@ struct ContentView: View {
                 .frame(maxWidth: 400)
                 
                 if !viewModel.modelAvailable {
-                    Text("The Foundation Model isn't available. Make sure your device suports Apple Intelligence and that it is enabled.")
+                    Text("The Foundation Model isn't available. Make sure your device suports Apple Intelligence and that it's enabled.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -143,7 +143,7 @@ struct ContentView: View {
                 viewModel.clearError()
             }
         } message: {
-            Text(viewModel.errorMessage ?? "An unknown error occurred")
+            Text(viewModel.errorMessage ?? "This usually happens due to something trigerring the safety guardrails. Check the console for any erratic behavior.")
         }
         .sheet(isPresented: $showingFeedbackSheet) {
             FeedbackView(viewModel: viewModel)
