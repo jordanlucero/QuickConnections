@@ -5,6 +5,8 @@
 //  Created by Jordan Lucero on 6/10/25.
 //
 
+// Boilerplate, not needed.
+
 import Foundation
 import SwiftData
 
