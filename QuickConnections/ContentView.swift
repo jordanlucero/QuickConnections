@@ -7,6 +7,8 @@ struct ContentView: View {
     @Query private var items: [Item]
     @State private var textInput: String = ""
     @State private var showingAlert = false
+    @State private var showingFeedbackSheet = false
+    @State private var hasStartedPrewarm = false
     @StateObject private var viewModel = GenerationViewModel()
     
     let columns = [
@@ -17,16 +19,48 @@ struct ContentView: View {
         VStack(spacing: 20) {
             // Header Section
             VStack(spacing: 16) {
-                Text("QuickConnections")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.primary)
+                HStack {
+                    Spacer()
+                    Text("QuickConnections")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    
+                    // Feedback Button
+                    if viewModel.hasGeneratedContent {
+                        Button(action: {
+                            showingFeedbackSheet = true
+                        }) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.title2)
+                                .foregroundStyle(.primary)
+                                .frame(width: 44, height: 44)
+                                .background(Circle().fill(.ultraThinMaterial))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
                 
                 // Text Field with Two-Word Limit
                 HStack(spacing: 12) {
                     TextField("Enter a word or phrase", text: $textInput)
                         .textFieldStyle(.roundedBorder)
                         .onChange(of: textInput) { oldValue, newValue in
+                            // Prewarm on first character typed
+                            if oldValue.isEmpty && !newValue.isEmpty && !hasStartedPrewarm {
+                                print("User started typing - triggering prewarm")
+                                hasStartedPrewarm = true
+                                Task {
+                                    await viewModel.prewarmModel()
+                                }
+                            }
+                            
+                            // Reset prewarm flag when text is cleared
+                            if newValue.isEmpty {
+                                hasStartedPrewarm = false
+                            }
+                            
                             // Check if more than two words
                             let words = newValue.split(separator: " ").filter { !$0.isEmpty }
                             if words.count > 2 {
@@ -103,6 +137,16 @@ struct ContentView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text("You can only enter up to two words.")
+        }
+        .alert("Generation Error", isPresented: $viewModel.showingError) {
+            Button("OK", role: .cancel) {
+                viewModel.clearError()
+            }
+        } message: {
+            Text(viewModel.errorMessage ?? "An unknown error occurred")
+        }
+        .sheet(isPresented: $showingFeedbackSheet) {
+            FeedbackView(viewModel: viewModel)
         }
     }
     

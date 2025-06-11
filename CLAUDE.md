@@ -36,8 +36,10 @@ The app follows a standard SwiftUI + MVVM architecture with Apple's Foundation M
 - **GenerationViewModel.swift**: ObservableObject view model that:
   - Manages the LanguageModelSession with Foundation Models
   - Handles model availability checking
-  - Generates 15-20 related words using on-device AI
+  - Generates related words using on-device AI (up to 10 generations)
   - Animates word appearance with staggered timing
+  - Handles errors including context window exceeded and unsupported languages
+  - Automatically recovers from context window errors by creating new sessions
 - **Item.swift**: SwiftData model for storing timestamps of generation events
 - **test.swift**: Contains a Swift Playground for testing LanguageModel capabilities
 
