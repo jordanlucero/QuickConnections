@@ -32,7 +32,7 @@ struct ContentView: View {
                         }
                     }
                     .padding(.horizontal, 12)
-                    .padding(.top, 100) // Space for header
+                    .padding(.top, 130) // Space for header
                     .padding(.bottom, 100) // Space for floating input
                 }
                 .ignoresSafeArea()
