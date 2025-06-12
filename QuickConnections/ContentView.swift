@@ -18,15 +18,53 @@ struct ContentView: View {
     ]
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Header Section
-            VStack(spacing: 16) {
+        ZStack {
+            // Main content area
+            if !viewModel.generatedWords.isEmpty {
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 12) {
+                        ForEach(Array(viewModel.generatedWords.enumerated()), id: \.offset) { index, word in
+                            WordBubble(word: word)
+                                .transition(.asymmetric(
+                                    insertion: .scale.combined(with: .opacity),
+                                    removal: .scale.combined(with: .opacity)
+                                ))
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.top, 100) // Space for header
+                    .padding(.bottom, 100) // Space for floating input
+                }
+                .ignoresSafeArea()
+            } else if viewModel.isGenerating {
+                VStack(spacing: 12) {
+                    ProgressView()
+                    Text("Generating related words...")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxHeight: .infinity)
+            } else {
+                VStack(spacing: 12) {
+                    Image(systemName: "sparkles.rectangle.stack")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.tertiary)
+                    Text("Enter a word to generate connections")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxHeight: .infinity)
+            }
+            
+            // Header with menu button
+            VStack {
+                // Status bar blur area
+                Color.clear
+                    .frame(height: 0)
+                    .background(.regularMaterial)
+                    .ignoresSafeArea()
+                
                 HStack {
-                    Spacer()
-                    Text("QuickConnections")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.primary)
                     Spacer()
                     
                     // Menu Button
@@ -62,98 +100,84 @@ struct ContentView: View {
                     .buttonStyle(.plain)
                     .glassEffect()
                 }
+                .padding(.horizontal)
+                .padding(.top, 8)
                 
-                // Text Field with Two-Word Limit
-                HStack(spacing: 12) {
-                    TextField("Enter a word", text: $textInput)
-                        .textFieldStyle(.roundedBorder)
-                        .onChange(of: textInput) { oldValue, newValue in
-                            // Prewarm on first character typed (Not functional)
-                            if oldValue.isEmpty && !newValue.isEmpty && !hasStartedPrewarm {
-                                print("User started typing - triggering prewarm")
-                                hasStartedPrewarm = true
-                                Task {
-                                    await viewModel.prewarmModel()
+                Spacer()
+            }
+            
+            // Floating Text Field
+            VStack {
+                Spacer()
+                
+                VStack(spacing: 12) {
+                    HStack(spacing: 12) {
+                        // Floating glass text field with embedded button
+                        HStack(spacing: 8) {
+                            TextField("Enter a word", text: $textInput)
+                                .textFieldStyle(.plain)
+                                .font(.body)
+                                .onChange(of: textInput) { oldValue, newValue in
+                                    // Prewarm on first character typed (Not functional)
+                                    if oldValue.isEmpty && !newValue.isEmpty && !hasStartedPrewarm {
+                                        print("User started typing - triggering prewarm")
+                                        hasStartedPrewarm = true
+                                        Task {
+                                            await viewModel.prewarmModel()
+                                        }
+                                    }
+                                    
+                                    // Reset prewarm flag when text is cleared
+                                    if newValue.isEmpty {
+                                        hasStartedPrewarm = false
+                                    }
+                                    
+                                    // Check if more than two words
+                                    let words = newValue.split(separator: " ").filter { !$0.isEmpty }
+                                    if words.count > 2 {
+                                        // Revert to the old value
+                                        textInput = oldValue
+                                        showingAlert = true
+                                    }
+                                }
+                                .onSubmit {
+                                    generateWords()
+                                }
+                                .disabled(viewModel.isGenerating)
+                            
+                            Button(action: generateWords) {
+                                if viewModel.isGenerating {
+                                    ProgressView()
+                                        .scaleEffect(0.7)
+                                        .frame(width: 16, height: 16)
+                                } else {
+                                    Image(systemName: "sparkles")
+                                        .font(.system(size: 16, weight: .medium))
                                 }
                             }
-                            
-                            // Reset prewarm flag when text is cleared
-                            if newValue.isEmpty {
-                                hasStartedPrewarm = false
-                            }
-                            
-                            // Check if more than two words
-                            let words = newValue.split(separator: " ").filter { !$0.isEmpty }
-                            if words.count > 2 {
-                                // Revert to the old value
-                                textInput = oldValue
-                                showingAlert = true
-                            }
+                            .frame(width: 32, height: 32)
+                            .background(Color.accentColor)
+                            .foregroundStyle(.white)
+                            .clipShape(Circle())
+                            .disabled(textInput.isEmpty || viewModel.isGenerating || !viewModel.modelAvailable)
                         }
-                        .onSubmit {
-                            generateWords()
-                        }
-                        .disabled(viewModel.isGenerating)
-                    
-                    Button(action: generateWords) {
-                        if viewModel.isGenerating {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                                .frame(width: 20, height: 20)
-                        } else {
-                            Image(systemName: "sparkles")
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .glassEffect()
-                    .disabled(textInput.isEmpty || viewModel.isGenerating || !viewModel.modelAvailable)
-                }
-                .frame(maxWidth: 400)
-                
-                if !viewModel.modelAvailable {
-                    Text("The Foundation Model isn't available. Make sure your device and language suports Apple Intelligence and that it's enabled.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.top, 20)
-            
-            // Generated Words Section
-            if !viewModel.generatedWords.isEmpty {
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(Array(viewModel.generatedWords.enumerated()), id: \.offset) { index, word in
-                            WordBubble(word: word)
-                                .transition(.asymmetric(
-                                    insertion: .scale.combined(with: .opacity),
-                                    removal: .scale.combined(with: .opacity)
-                                ))
-                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(.regularMaterial)
+                        .clipShape(Capsule())
+                        .glassEffect()
                     }
                     .padding(.horizontal)
+                    
+                    if !viewModel.modelAvailable {
+                        Text("The Foundation Model isn't available. Make sure your device and language suports Apple Intelligence and that it's enabled.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal)
+                    }
                 }
-            } else if viewModel.isGenerating {
-                VStack(spacing: 12) {
-                    ProgressView()
-                    Text("Generating related words...")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxHeight: .infinity)
-            } else {
-                VStack(spacing: 12) {
-                    Image(systemName: "sparkles.rectangle.stack")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.tertiary)
-                    Text("Enter a word to generate connections")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxHeight: .infinity)
+                .padding(.bottom, 20)
             }
-            
-            Spacer(minLength: 0)
         }
         .alert("Word Limit Exceeded", isPresented: $showingAlert) {
             Button("OK", role: .cancel) { }
