@@ -1,6 +1,7 @@
 QuickConnections is a sample app that utilizes the Foundation Models framework in iOS 26 aligned releases. Give the model a word and it will spit a handful of synonyms, related concepts, and anything else it sees fit.  
   
-  
+  ![Screenshot](https://github.com/user-attachments/assets/9e6500f9-2496-46c9-a80d-b6dc9c3dd0c3)
+
   
 ## **Compile in Xcode 26**  
 QuickConnections is an Xcode 26 project that targets iOS and iPadOS, with “Designed for iPad” support for macOS Tahoe and visionOS 26. Keep in mind that compiling the app and running it in a simulator will likely require macOS Tahoe.  
