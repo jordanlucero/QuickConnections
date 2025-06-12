@@ -86,15 +86,20 @@ struct FeedbackView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
         }
         .sheet(isPresented: $showingShareSheet) {
             if let feedbackData = feedbackData {
-                ShareSheet(data: feedbackData)
+                ShareSheet(data: feedbackData, onDismiss: {
+                    dismiss()
+                })
             }
         }
     }
@@ -136,6 +141,7 @@ struct FeedbackView: View {
 
 struct ShareSheet: UIViewControllerRepresentable {
     let data: Data
+    let onDismiss: () -> Void
     
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("language_model_feedback.json")
@@ -146,8 +152,15 @@ struct ShareSheet: UIViewControllerRepresentable {
             applicationActivities: nil
         )
         
-        activityVC.completionWithItemsHandler = { _, _, _, _ in
+        activityVC.completionWithItemsHandler = { activityType, completed, _, _ in
             try? FileManager.default.removeItem(at: tempURL)
+            
+            // Dismiss the feedback view after sharing
+            if completed {
+                DispatchQueue.main.async {
+                    onDismiss()
+                }
+            }
         }
         
         return activityVC
