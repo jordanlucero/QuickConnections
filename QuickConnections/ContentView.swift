@@ -36,6 +36,9 @@ struct ContentView: View {
                     .padding(.bottom, 100) // Space for floating input
                 }
                 .ignoresSafeArea()
+                .onTapGesture {
+                    hideKeyboard()
+                }
             } else if viewModel.isGenerating {
                 VStack(spacing: 12) {
                     ProgressView()
@@ -44,6 +47,9 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxHeight: .infinity)
+                .onTapGesture {
+                    hideKeyboard()
+                }
             } else {
                 VStack(spacing: 12) {
                     Image(systemName: "sparkles.rectangle.stack")
@@ -54,6 +60,9 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxHeight: .infinity)
+                .onTapGesture {
+                    hideKeyboard()
+                }
             }
             
             // Header with menu button
@@ -211,6 +220,10 @@ struct ContentView: View {
             let newItem = Item(timestamp: Date())
             modelContext.insert(newItem)
         }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
