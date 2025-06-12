@@ -12,30 +12,22 @@ struct InfoView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Image(systemName: "brain.filled.head.profile")
-                    .font(.system(size: 60))
-                    .foregroundStyle(.blue)
-                    .padding(.top, 40)
+            VStack(alignment: .leading, spacing: 20) {
                 
                 Text("QuickConnections")
-                    .font(.largeTitle)
+                    .font(.title3)
                     .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Text("Generate related words from any input")
+                Text("QuickConnections uses the Foundation Models framework to generate related words to a given word. Find synonyms, related concepts, and get a feel of how the LLM living on your device makes connctions between concepts!")
                     .font(.title3)
                     .foregroundStyle(.secondary)
                 
-                Spacer()
-                
-                // Placeholder content
-                Text("More information coming soon...")
-                    .font(.body)
+                Text("Please keep in mind that this is a sample app. It lacks the necessary safeguards that you would expect from other AI products. As this framework evolves, you may encounter some growing pains. If you come across harmful content, you can report it to Apple by exporting a file that you can take to Feedback Assistant using the context menu while the content is still visible.")
+                    .font(.title3)
                     .foregroundStyle(.secondary)
-                    .padding()
-                
-                Spacer()
             }
+            .padding()
             .navigationTitle("About")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -49,4 +41,8 @@ struct InfoView: View {
             }
         }
     }
+}
+
+#Preview {
+    InfoView()
 }
