@@ -60,8 +60,11 @@ class GenerationViewModel: ObservableObject {
         
         await performGeneration(isFirstGeneration: true)
         
-        // Automatically generate more words up to 9 additional times (10 total)
-        for i in 1...9 {
+        // Get the user's preferred generation count from UserDefaults
+        let maxGenerations = UserDefaults.standard.generationCount
+        
+        // Automatically generate more words up to (maxGenerations - 1) additional times
+        for i in 1..<maxGenerations {
             // Check if the user has changed the input
             if currentInput != input {
                 break
@@ -161,7 +164,7 @@ class GenerationViewModel: ObservableObject {
             
             if errorDescription.contains("exceededContextWindowSize") {
                 // Handle context window exceeded
-                print("Context window exceeded, creating new session")
+                print("The context window was exceeded. Please try again.")
                 handleContextWindowExceeded()
             } else if errorDescription.contains("unsupportedLanguageOrLocale") {
                 // Handle unsupported language
@@ -174,7 +177,7 @@ class GenerationViewModel: ObservableObject {
                 // Handle other errors
                 print("Error generating words: \(error)")
                 await MainActor.run {
-                    self.errorMessage = "An error occurred while generating words. Please try again."
+                    self.errorMessage = "This usually happens due to something trigerring the safety guardrails. Check the console for any erratic behavior, or try again with less generation turns."
                     self.showingError = true
                 }
             }

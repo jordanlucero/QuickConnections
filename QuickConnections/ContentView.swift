@@ -8,6 +8,8 @@ struct ContentView: View {
     @State private var textInput: String = ""
     @State private var showingAlert = false
     @State private var showingFeedbackSheet = false
+    @State private var showingSettingsSheet = false
+    @State private var showingInfoSheet = false
     @State private var hasStartedPrewarm = false
     @StateObject private var viewModel = GenerationViewModel()
     
@@ -27,19 +29,38 @@ struct ContentView: View {
                         .foregroundStyle(.primary)
                     Spacer()
                     
-                    // Feedback Button
-                    if viewModel.hasGeneratedContent {
+                    // Menu Button
+                    Menu {
                         Button(action: {
-                            showingFeedbackSheet = true
+                            showingSettingsSheet = true
                         }) {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.title2)
-                                .foregroundStyle(.primary)
-                                .frame(width: 44, height: 44)
-                                .background(Circle().fill(.ultraThinMaterial))
+                            Label("Settings", systemImage: "gearshape")
                         }
-                        .buttonStyle(.plain)
+                        
+                        Button(action: {
+                            showingInfoSheet = true
+                        }) {
+                            Label("About", systemImage: "info.circle")
+                        }
+                        
+                        if viewModel.hasGeneratedContent {
+                            Divider()
+                            
+                            Button(action: {
+                                showingFeedbackSheet = true
+                            }) {
+                                Label("Export for Feedback Assistant", systemImage: "square.and.arrow.up")
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .font(.title2)
+                            .foregroundStyle(.primary)
+                            .frame(width: 44, height: 44)
+                            .background(Circle().fill(.ultraThinMaterial))
                     }
+                    .buttonStyle(.plain)
+                    .glassEffect()
                 }
                 
                 // Text Field with Two-Word Limit
@@ -47,7 +68,7 @@ struct ContentView: View {
                     TextField("Enter a word", text: $textInput)
                         .textFieldStyle(.roundedBorder)
                         .onChange(of: textInput) { oldValue, newValue in
-                            // Prewarm on first character typed
+                            // Prewarm on first character typed (Not functional)
                             if oldValue.isEmpty && !newValue.isEmpty && !hasStartedPrewarm {
                                 print("User started typing - triggering prewarm")
                                 hasStartedPrewarm = true
@@ -84,12 +105,13 @@ struct ContentView: View {
                         }
                     }
                     .buttonStyle(.borderedProminent)
+                    .glassEffect()
                     .disabled(textInput.isEmpty || viewModel.isGenerating || !viewModel.modelAvailable)
                 }
                 .frame(maxWidth: 400)
                 
                 if !viewModel.modelAvailable {
-                    Text("The Foundation Model isn't available. Make sure your device suports Apple Intelligence and that it's enabled.")
+                    Text("The Foundation Model isn't available. Make sure your device and language suports Apple Intelligence and that it's enabled.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -143,10 +165,16 @@ struct ContentView: View {
                 viewModel.clearError()
             }
         } message: {
-            Text(viewModel.errorMessage ?? "This usually happens due to something trigerring the safety guardrails. Check the console for any erratic behavior.")
+            Text(viewModel.errorMessage ?? "This usually happens due to something trigerring the safety guardrails. Check the console for any erratic behavior, or try again with less generation turns.")
         }
         .sheet(isPresented: $showingFeedbackSheet) {
             FeedbackView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showingSettingsSheet) {
+            SettingsView()
+        }
+        .sheet(isPresented: $showingInfoSheet) {
+            InfoView()
         }
     }
     
