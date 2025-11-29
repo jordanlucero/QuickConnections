@@ -15,7 +15,7 @@ extension UserDefaults {
     var generationCount: Int {
         get {
             let count = integer(forKey: Keys.generationCount)
-            // Return default of 5 if no value set yet
+            // Return default of 5 if no value is set yet
             return count == 0 ? 5 : count
         }
         set {

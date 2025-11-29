@@ -5,6 +5,8 @@
 //  Created by Jordan Lucero on 6/10/25.
 //
 
+// The original purpose of this module was to interact with APIs that Apple has since removed from all OS SDKs.
+
 import SwiftUI
 import FoundationModels
 import UniformTypeIdentifiers
@@ -12,22 +14,35 @@ import UniformTypeIdentifiers
 struct FeedbackView: View {
     @ObservedObject var viewModel: GenerationViewModel
     @Environment(\.dismiss) private var dismiss
-    
-    @State private var sentiment: LanguageModelFeedbackAttachment.Sentiment?
+
+    // Custom sentiment enum to replace removed LanguageModelFeedbackAttachment.Sentiment
+    enum FeedbackSentiment: String, Codable {
+        case positive
+        case negative
+    }
+
+    @State private var sentiment: FeedbackSentiment?
     @State private var selectedIssues: Set<FeedbackIssueType> = []
     @State private var desiredOutput: String = ""
     @State private var showingShareSheet = false
     @State private var feedbackData: Data?
-    
+
     enum FeedbackIssueType: String, CaseIterable {
         case factuallyIncorrect = "Factually Incorrect"
         case offensive = "Offensive Content"
         case unhelpful = "Unhelpful Response"
-        // Claude may just be making these up.
-        
+
         var displayName: String {
             return self.rawValue
         }
+    }
+
+    // Custom feedback structure to replace removed LanguageModelFeedbackAttachment
+    struct FeedbackData: Codable {
+        let sentiment: FeedbackSentiment
+        let issues: [String]
+        let desiredOutput: String
+        let timestamp: Date
     }
     
     var body: some View {
@@ -105,32 +120,21 @@ struct FeedbackView: View {
     }
     
     private func prepareFeedback() {
-        guard let session = viewModel.getSession(),
-              let sentiment = sentiment else { return }
-        
-        let transcript = session.transcript
-        let entries = transcript.entries
-        
-        // Get the last user input and model output
-        guard entries.count >= 2 else { return }
-        
-        let inputEntries = Array(entries.dropLast())
-        let outputEntry = entries.last!
-        
-        // Create feedback attachment without issues for now
-        // Since we don't know the exact Issue.Category enum cases
-        let feedback = LanguageModelFeedbackAttachment(
-            input: inputEntries,
-            output: [outputEntry],
+        guard let sentiment = sentiment else { return }
+
+        // Create custom feedback data since LanguageModelFeedbackAttachment was removed from public API
+        let feedback = FeedbackData(
             sentiment: sentiment,
-            issues: [],  // Empty for now
-            desiredOutputExamples: []
+            issues: selectedIssues.map { $0.rawValue },
+            desiredOutput: desiredOutput,
+            timestamp: Date()
         )
-        
+
         // Encode to JSON
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
+            encoder.dateEncodingStrategy = .iso8601
             feedbackData = try encoder.encode(feedback)
             showingShareSheet = true
         } catch {

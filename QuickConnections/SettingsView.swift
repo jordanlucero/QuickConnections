@@ -36,9 +36,10 @@ struct SettingsView: View {
                         }
                         .tint(.blue)
                         
-                        Text("Controls how many rounds of word generation occur for each input. The Foundation Model may begin to behave erratically with more generation turns as of Beta 1.")
+                        Text("Controls how many rounds of word generation occur for each input.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                        // Additional generations may cause some versions of the Foundation Model to behave erratically.
                     }
                     .padding(.vertical, 8)
                 }

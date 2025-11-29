@@ -3,14 +3,14 @@ QuickConnections is a sample app that utilizes the Foundation Models framework i
   ![Screenshot](https://github.com/user-attachments/assets/9e6500f9-2496-46c9-a80d-b6dc9c3dd0c3)
 
   
-## **Compile in Xcode 26**  
-QuickConnections is an Xcode 26 project that targets iOS and iPadOS, with “Designed for iPad” support for macOS Tahoe and visionOS 26. Keep in mind that compiling the app and running it in a simulator will likely require macOS Tahoe.  
+## **Complilation in Xcode 26**  
+QuickConnections is an Xcode 26 project that targets iOS and iPadOS, with “Designed for iPad” support for macOS Tahoe and visionOS 26. Running QuickConnections in a simulator requires macOS Tahoe.  
   
 ## **Claude Code usage**  
-The majority of the code in the project has been generated with Claude Code, using Claude 4 Sonnet and Claude 4 Opus. The app does not have network access.  
+The majority of the code in the project has been generated with Claude Code, using Claude 4 Sonnet,  Claude 4 Opus, and Claude 4.5 Opus. The app does not have network access.  
   
 ## **Troubleshooting**  
 * QuickConnections does not use delta responses due to the relative simplicity of the prompt that is passed to the Foundation Model. Instead, a transcript runs the prompt from 3-10 times (default of 5) and includes any words that haven’t been seen yet.  
 * QuickConnections does not follow best practices for error-handling, as it’s just a sample app. Requests may fail due to the unavailability of Apple Intelligence or device pressure. If requests are taking too long, I’ve found that it’s beneficial to quit and reopen the app. If you are receiving rate-limiting errors, please try running QuickConnections on a real device, as this is a known issue with Xcode Simulators.
 * Pre-warming is not yet functional.  
-* Output quality is highly inconsistent as of the first developer betas. Generations you make in one app session may be focused and on-topic, while generations in another may be erratic and formatted incorrectly. Apple has noted that this is a known issue for (at least for longer transcripts) in the release notes for all developer betas that include the Foundation Models framework.  
+* Output quality can be inconsistent due to structured outputs not being used.

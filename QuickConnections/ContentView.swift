@@ -1,10 +1,7 @@
 import SwiftUI
-import SwiftData
 import FoundationModels
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
     @State private var textInput: String = ""
     @State private var showingAlert = false
     @State private var showingFeedbackSheet = false
@@ -55,7 +52,7 @@ struct ContentView: View {
                     Image(systemName: "sparkles.rectangle.stack")
                         .font(.system(size: 48))
                         .foregroundStyle(.tertiary)
-                    Text("Enter a word to generate connections")
+                    Text("Enter a word to generate connections!")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -89,22 +86,11 @@ struct ContentView: View {
                         }) {
                             Label("About", systemImage: "info.circle")
                         }
-                        
-                        if viewModel.hasGeneratedContent {
-                            Divider()
-                            
-                            Button(action: {
-                                showingFeedbackSheet = true
-                            }) {
-                                Label("Export for Feedback Assistant", systemImage: "square.and.arrow.up")
-                            }
-                        }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                             .font(.title2)
                             .foregroundStyle(.primary)
                             .frame(width: 44, height: 44)
-                            .background(Circle().fill(.ultraThinMaterial))
                     }
                     .buttonStyle(.plain)
                     .glassEffect()
@@ -179,7 +165,7 @@ struct ContentView: View {
                     .padding(.horizontal)
                     
                     if !viewModel.modelAvailable {
-                        Text("The Foundation Model isn't available. Make sure your device and language suports Apple Intelligence and that it's enabled.")
+                        Text("The Foundation Model isn't available. Make sure your device and language is supported by Apple Intelligence and it's enabled.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .padding(.horizontal)
@@ -213,12 +199,9 @@ struct ContentView: View {
     
     private func generateWords() {
         guard !textInput.isEmpty && viewModel.modelAvailable else { return }
-        
+
         Task {
             await viewModel.generateRelatedWords(for: textInput)
-            // Store the query in SwiftData
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
         }
     }
     
@@ -261,5 +244,4 @@ struct WordBubble: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

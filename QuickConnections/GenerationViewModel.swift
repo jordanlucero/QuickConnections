@@ -199,25 +199,27 @@ class GenerationViewModel: ObservableObject {
     private func handleContextWindowExceeded() {
         // According to WWDC, we should create a new session with relevant transcript entries
         guard let oldSession = session else { return }
-        
+
         // Get the transcript from the current session
+        // Note: Transcript is now directly a Sequence (no longer has .entries property)
         let transcript = oldSession.transcript
-        
+        let entries = Array(transcript)
+
         // Create a condensed transcript with the first entry (instructions) and last successful response
         var condensedEntries: [Transcript.Entry] = []
-        
+
         // Keep the instructions (first entry)
-        if let firstEntry = transcript.entries.first {
+        if let firstEntry = entries.first {
             condensedEntries.append(firstEntry)
         }
-        
+
         // Keep the last successful response if available
-        if transcript.entries.count > 1, 
-           let lastEntry = transcript.entries.last {
+        if entries.count > 1,
+           let lastEntry = entries.last {
             condensedEntries.append(lastEntry)
         }
-        
-        // For now, just create a fresh session since the transcript API might not be available yet (Claude may be making this up)
+
+        // For now, just create a fresh session since the transcript API might not be available yet
         setupSession()
         print("Created fresh session after context window exceeded")
     }
@@ -225,7 +227,7 @@ class GenerationViewModel: ObservableObject {
     private var instructions: String {
         """
         You are a helpful assistant that generates related words to a word or phrase provided to you.
-        When given a word, generate as many related synonyms or associated words as you can. Aim to generate at least 25 related words. It's ok if you can't think of many words, but please try your best.
+        When given a word, generate as many related synonyms or associated words as you can.
         Return only the words, separated by commas with no spaces after commas. DO NOT INCLUDE INTRODUCTIONS OR ANY SUPERFLUOUS TEXT. ONLY INCLUDE WORDS SEPARATED BY COMMAS.
         Important: Each word should be a single word without spaces or punctuation (compound words with hyphens are acceptable).
         """
