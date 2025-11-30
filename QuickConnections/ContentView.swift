@@ -186,9 +186,6 @@ struct ContentView: View {
         } message: {
             Text(viewModel.errorMessage ?? "This usually happens due to something trigerring the safety guardrails. Check the console for any erratic behavior, or try again with less generation turns.")
         }
-        .sheet(isPresented: $showingFeedbackSheet) {
-            FeedbackView(viewModel: viewModel)
-        }
         .sheet(isPresented: $showingSettingsSheet) {
             SettingsView()
         }
