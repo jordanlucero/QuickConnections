@@ -21,13 +21,11 @@ struct InfoView: View {
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Text("QuickConnections uses the Foundation Models framework to generate related words to a given word. Find synonyms, related concepts, and get a feel of how the LLM living on your device makes connctions between concepts!")
+                Text("QuickConnections uses the Foundation Models framework to generate related words to a given word. Find synonyms, related concepts, and get a feel of how the on-device LLM makes connctions between concepts!")
                     .font(.title3)
                     .foregroundStyle(.secondary)
             }
-            .padding()
-            .navigationTitle("About")
-            .navigationBarTitleDisplayMode(.inline)
+            .padding(30)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -35,6 +33,7 @@ struct InfoView: View {
                     } label: {
                         Image(systemName: "checkmark")
                     }
+                    .buttonStyle(.glassProminent)
                 }
             }
         }

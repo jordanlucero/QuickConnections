@@ -47,14 +47,19 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button {
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
                     }
+                    .buttonStyle(.glassProminent)
                 }
             }
         }
     }
+}
+
+#Preview {
+    SettingsView()
 }
